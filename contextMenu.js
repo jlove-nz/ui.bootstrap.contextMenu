@@ -1,6 +1,55 @@
 angular.module('ui.bootstrap.contextMenu', [])
 
 .directive('contextMenu', ["$parse", function ($parse) {
+
+    // This code is based on the bootstrap-contextmenu.js plugin.
+    // from https://github.com/sydcanem/bootstrap-contextmenu. It
+    // is used so that if a user attempts to show a dropdown menu
+    // near the edge of their screen, the context menu is repositioned
+    // to be entirely on it, rather than having it partially off, 
+    // which means they don't need to scroll to see the rest.
+	var getPosition = function(e, $menu) {
+        var mouseX = e.clientX
+            , mouseY = e.clientY
+            , boundsX = $(window).width()
+            , boundsY = $(window).height()
+            , menuWidth = $menu.find('.dropdown-menu').outerWidth()
+            , menuHeight = $menu.find('.dropdown-menu').outerHeight()
+            , tp = {}
+            , Y, X, parentOffset;
+
+        // This may not work for scrolling situations - I haven't tested
+        // with all manner of layouts, only with the ones relevant to my
+        // system.
+        // 
+        // The - 5 is to give a small buffer for padding around the
+        // main dialog. Mostly for aesthetics.
+        //
+        // Also note that the logic assumes that the context menu will
+        // work as the context menu will be displayed attached to a
+        // div with relative positioning. This matches the original logic.
+        if (mouseY + menuHeight > boundsY) {
+            Y = {"top": -1 * (mouseY + menuHeight - boundsY) - 5 }
+        } else {
+            Y = {"top": 0 }
+        }
+
+        if ((mouseX + menuWidth > boundsX) && ((mouseX - menuWidth) > 0)) {
+            X = {"left": -1 * (mouseX + menuWidth - boundsX) - 5 }
+        } else {
+            X = {"left": 0 }
+        }
+
+        // If context-menu's parent is positioned using absolute or relative positioning,
+        // the calculated mouse position will be incorrect.
+        // Adjust the position of the menu by its offset parent position.
+        parentOffset = $menu.offsetParent().offset();
+        X.left = X.left - parentOffset.left;
+        Y.top = Y.top - parentOffset.top;
+
+        return $.extend(tp, Y, X);
+    }
+
     var renderContextMenu = function ($scope, event, options, model) {
         if (!$) { var $ = angular.element; }
         $(event.currentTarget).addClass('context');
@@ -59,6 +108,14 @@ angular.module('ui.bootstrap.contextMenu', [])
             zIndex: 9999
         });
         $(document).find('body').append($contextMenu);
+
+        // New reposition so that if the context menu would go off the screen,
+        // it is repositioned to not do so. We need to do this after adding the
+        // context menu to the screen otherwise we don't have appropriate sizing
+        // for the menu.
+        var contextMenuCss = getPosition(event, $contextMenu);
+        $contextMenu.css(contextMenuCss);
+
         $contextMenu.on("mousedown", function (e) {
             if ($(e.target).hasClass('dropdown')) {
                 $(event.currentTarget).removeClass('context');
