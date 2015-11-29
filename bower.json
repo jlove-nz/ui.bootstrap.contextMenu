@@ -1,12 +1,13 @@
 {
-    "name": "angular-bootstrap-contextmenu",
-    "version": "0.9.4",
+    "name": "angular-bootstrap-contextmenu-jlove",
+    "version": "0.9.5",
     "main": [ 
         "contextMenu.js"
     ],
-    "homepage": "https://github.com/Templarian/ui.bootstrap.contextMenu",
+    "homepage": "https://github.com/jlove-nz/ui.bootstrap.contextMenu",
     "authors": [
         { "name": "Austin Andrews", "homepage": "http://templarian.com" }
+        , { "name": "Jamie Love", "homepage": "http://www.nsquaredsoftware.com" }
     ],
     "license": ["MIT"],
     "ignore": [
